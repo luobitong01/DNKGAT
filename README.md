@@ -1,0 +1,6 @@
+# DNKGAT: Dynamic Neighbor-enhanced Knowledge Graph Attention Network for Rumor Detection
+Detecting rumors on social media is critical due to their rapid spread and harmful effects, yet existing models often overlook integrating structural and temporal neighboring information of message propagation, as well as the dynamics of background knowledge in user comments.
+To address this gap, we present a principled \emph{Dynamic Neighbor-enhanced Knowledge Graph Attention Network} (DNKGAT), which unifies the dynamics of message propagation and evolving background knowledge from knowledge graphs. 
+Specifically, the proposed method employs a multi-hop knowledge graph attention mechanism to incorporate extensive neighborhood information from knowledge graphs, a feature previously underexplored.
+The framework includes a post-enhancement unit and a rumor classification module, enhancing detection capabilities by learning dynamic event representations and aggregating them progressively to capture cascading effects for more effective rumor identification. 
+Extensive experiments on two real-world datasets demonstrate significant improvements over strong baselines, particularly in early-stage rumor detection.
