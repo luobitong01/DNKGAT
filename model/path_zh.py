@@ -1,18 +1,9 @@
 import os
-import sys
-
 
 class path_Set_BERT():
     def __init__(self,dataset, dataset_dir=""):
         self.path_data_dir = os.path.join(dataset_dir, "data/{}".format(dataset))
 
-        # vocab
-        # self.path_entity_concept_2id = os.path.join(self.path_data_dir, "entity_concept_2id.csv")
-        # path_relation2id = os.path.join(path_data_dir, "relation2id.txt")
-        # self.path_token2id = os.path.join(self.path_data_dir, "token2id.csv")
-
-        #mapped files
-        # self.path_mid2token = os.path.join(self.path_data_dir, "mid2token.csv")
         self.path_node2idx_mid = os.path.join(self.path_data_dir, "node2idx_mid.txt")
         self.path_mid2text = os.path.join(self.path_data_dir, 'mid2text.txt')
 
