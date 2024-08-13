@@ -16,38 +16,28 @@ import torch.optim as optim
 from util import *
 from path_zh import *
 from data import *
-from config import dual_dynamic_graph_Config
+from config import dynamic_graph_Config
 from models import *
-# from models import dual_dynamic_graph
 from data_process import *
 from torch_geometric.data import DataLoader
-# from torch.utils.data import DataLoader
 import warnings
 warnings.filterwarnings('ignore')
 
 #===================train&test==================
 def train_nn_nBatch_completed(train_dict, val_dict,test_dict, model, device,config,dataset,model_mode,args):
     pytorch_total_trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    # print('model bert:',model.bert)  #model.bert指bert部分的模型
-    # print('model layer_stack_propagation:',model.layer_stack_propagation) #model.layer_stack_propagation指的是3个propagation GCN
     print('total number of parameters:', pytorch_total_trainable_params)
-    # batch_size = 1
     # =========================================================================================
     train_x_propagation_node_indices, train_x_propagation_node_values, train_x_propagation_idx, \
     train_x_knowledge_node_indices, train_x_knowledge_node_values, train_x_knowledge_idx, \
     train_target, train_root_idx = train_dict['x_p_indices'], train_dict['x_p_values'], train_dict['idx_p'], \
                                    train_dict['x_k_indices'], train_dict['x_k_values'], train_dict['idx_k'], \
                                    train_dict['y'], train_dict['root_idx_p']
-    # print('train train_x_propagation_node_values:',train_x_propagation_node_values)
     val_x_propagation_node_indices, val_x_propagation_node_values, val_x_propagation_idx, \
     val_x_knowledge_node_indices, val_x_knowledge_node_values, val_x_knowledge_idx, \
     val_target, val_root_idx = val_dict['x_p_indices'], val_dict['x_p_values'], val_dict['idx_p'], \
                                val_dict['x_k_indices'], val_dict['x_k_values'], val_dict['idx_k'], \
                                val_dict['y'], val_dict['root_idx_p']
-    # t_batch = len(train_x_propagation_node)
-    # batch_size
-    # print('node size',train_x_propagation_node[0].size())
-    # print('node type',train_x_propagation_node[0][0][0])
     traindata_list = loadData_bert(train_x_propagation_idx, train_x_propagation_node_indices,
                               train_x_propagation_node_values, \
                               train_x_knowledge_idx, train_x_knowledge_node_indices, train_x_knowledge_node_values, \
@@ -64,24 +54,16 @@ def train_nn_nBatch_completed(train_dict, val_dict,test_dict, model, device,conf
     # ===============================================================================================
     model.train()
     criterion_clf = nn.BCELoss()
-    #===========bert部分lr和其余部分lr相同
-    # optimizer = optim.Adam(model.parameters(), lr = args.lr)#, weight_decay = config.weight_decay)
-    #===========bert部分lr和其余部分lr不同
     bert_params = list(map(id,model.bert.parameters()))
     base_params = filter(lambda p:id(p) not in bert_params,model.parameters())
-    # print('bert_params:',bert_params)
-    # print('bert id:',id)
     optimizer = optim.Adam([
         {'params':model.bert.parameters(), 'lr':5e-5},
         {'params':base_params}
-    ],lr=args.lr)#,weight_decay=config.weight_decay)
-    #lr变化 scheduler
+    ],lr=args.lr)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer,'min',factor=0.1,patience=5,verbose=True)
-    #early stopping
     earlystopping = EarlyStopping_acc(10)
     val_loss_min = 5
     val_acc_max = 0
-    #在finish predicting 前再显示一下test best result
     best_test_result_dict = {}
     best_test_result_dict['acc'] = 0
     best_test_result_dict['prec'] = 0
@@ -91,12 +73,7 @@ def train_nn_nBatch_completed(train_dict, val_dict,test_dict, model, device,conf
     for epoch in range(args.epoch):
         count_train = 0
         total_loss, total_acc = 0,0
-        # count += 1
-        # tqdm_train_loader = tqdm(train_loader)
-        avg_acc = []
-        avg_loss = []
         for Batch_data in train_loader:
-            # count += 1
             Batch_data.to(device)
             optimizer.zero_grad()
             output = model(Batch_data)
@@ -148,7 +125,6 @@ def train_nn_nBatch_completed(train_dict, val_dict,test_dict, model, device,conf
 
 def test_nn_nBatch_completed(test_dict, model, device,config,dataset,model_mode,args):
     model.eval()
-    ret_output = []
     test_result_dict = {}
     with torch.no_grad():
         count = 0
@@ -212,20 +188,18 @@ def main_nn_nBatch(args):
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.cuda)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dataset = args.dataset
-    config = dual_dynamic_graph_Config()
+    config = dynamic_graph_Config()
 
     model_mode = args.model
     pathset = path_Set_BERT(dataset, args.dataset_dir)
     # load data
     data_process = data_process_nn_nBatch_BERT(config.text_max_length,pathset,dataset)
-    # token_dict 检索entity、concept、post节点对应的nn.embedding序号，mid2regtextidx_dict检索文本对应的定长序号序列
     train_dict, val_dict, test_dict, token_dict, mid2bert_tokenizer = data_process.load_sparse_temporal_data(
         config.train, config.val, config.test)
     #------------------train---------------------------
     model = DynamicKnowledgeGraphAttention(token_dict=token_dict, mid2bert_tokenizer=mid2bert_tokenizer,
                                                  bert_path=pathset.path_bert,n_output=config.n_class, config=config, \
                                             device=device, n_hidden=3,dropout=0.2, instance_norm=False)
-
     model = model.to(device)
     if torch.cuda.device_count() > 1:
         model = torch.nn.DataParallel(model)
