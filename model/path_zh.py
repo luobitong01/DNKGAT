@@ -22,6 +22,9 @@ class path_Set_BERT():
         if dataset == 'weibo':
             self.path_bert = '../bert-base-chinese/'
             self.VOCAB = 'vocab.txt'
-        elif dataset == 'pheme':
+        elif dataset == 'pheme5':
+            self.path_bert = '../bert-base-uncased/'
+            self.VOCAB = 'vocab.txt'
+        elif dataset == 'pheme9':
             self.path_bert = '../bert-base-uncased/'
             self.VOCAB = 'vocab.txt'
