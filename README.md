@@ -1,4 +1,4 @@
-# DNKGAT: Dynamic Neighbor-enhanced Knowledge Graph Attention Network for Rumor Detection
+# DNKGAT: Multi-Hop Knowledge Graph Reasoning with LLM-Augmented Context for Fake News Detection
 pheme_clean, pheme_concept_yago, pheme_entity and pheme_temporal_data these four folders are packed into a zip file, and can be obtained from https://www.dropbox.com/s/xwn5dvqgx2n2vsd/pheme_peocessed_data.zip?dl=0. The Raw Pheme dataset can be obtained from https://figshare.com/articles/dataset/PHEME_dataset_for_Rumour_Detection_and_Veracity_Classification/6392078 (or https://www.dropbox.com/s/j8x105s60ow997f/all-rnr-annotated-threads.zip?dl=0).
 ## Run
 ```
